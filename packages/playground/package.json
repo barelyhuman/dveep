@@ -1,0 +1,15 @@
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "dveep throw --dev --src src"
+  },
+  "dependencies": {
+    "@barelyhuman/preact-island-plugins": "^0.0.10",
+    "dveep": "*",
+    "preact": "^10.15.0"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "playground",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "main": "index.js",
   "private": true,
   "license": "MIT",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@barelyhuman/preact-island-plugins": "^0.0.10",
-    "dveep": "^0.0.1-alpha.1",
+    "dveep": "^0.0.1-alpha.2",
     "preact": "^10.15.0"
   }
 }

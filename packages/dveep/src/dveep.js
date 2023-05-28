@@ -6,6 +6,7 @@
 // `_controllers` are a special folder
 
 import fs from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'path'
 import glob from 'tiny-glob'
 import { buildClientFile, buildServerEntry } from './lib/builder.js'
@@ -30,15 +31,18 @@ export async function dveep(options) {
     return
   }
 
-  const compiledClient = await nopanic(() =>
-    compileClient(config.generated.islands, {
-      dev: options.devMode,
-    })
-  )
+  // If any island was generated, compile that as well
+  if (existsSync(config.generated.islands)) {
+    const compiledClient = await nopanic(() =>
+      compileClient(config.generated.islands, {
+        dev: options.devMode,
+      })
+    )
 
-  if (compiledClient.err) {
-    console.error(err)
-    return
+    if (compiledClient.err) {
+      console.error(err)
+      return
+    }
   }
 
   const { app, router } = await prepareServer()

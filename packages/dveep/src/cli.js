@@ -16,8 +16,8 @@ prog.version(pkg.version).option('--src', 'Source folder', './src')
 prog
   .command('bottle')
   .alias('build')
-  .action(opts => {
-    dveep({
+  .action(async opts => {
+    await dveep({
       devMode: false,
       source: opts.src,
       buildOnly: true,
@@ -30,6 +30,12 @@ prog
   .option('--dev', 'Run in dev mode', false)
   .option('--port', 'Port to start the server on', 3000)
   .action(async opts => {
+    activeDveepInst = await dveep({
+      devMode: opts.dev,
+      source: opts.src,
+      port: opts.port,
+    })
+
     if (opts.dev) {
       const watcher = watch(
         await glob('./**/*', {
@@ -38,12 +44,6 @@ prog
           cwd: opts.src,
         })
       )
-
-      activeDveepInst = await dveep({
-        devMode: opts.dev,
-        source: opts.src,
-        port: opts.port,
-      })
 
       let isClosingPrevious
 

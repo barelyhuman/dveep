@@ -45,16 +45,20 @@ export async function dveep(options) {
     }
   }
 
-  const { app, router } = await prepareServer()
+  if (!options.buildOnly) {
+    const { app, router } = await prepareServer()
 
-  const routerFile = resolve(config.compiled.source, '_router.cjs')
-  if (routerFile) {
-    let routerMod = await import(routerFile)
-    routerMod = routerMod.default || routerMod
-    routerMod(router)
+    const routerFile = resolve(config.compiled.source, '_router.cjs')
+    if (routerFile) {
+      let routerMod = await import(routerFile)
+      routerMod = routerMod.default || routerMod
+      routerMod(router)
+    }
+
+    return serve(app)
   }
 
-  return serve(app)
+  return
 }
 
 async function compileSource(dir) {

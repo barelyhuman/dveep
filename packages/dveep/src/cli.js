@@ -45,18 +45,16 @@ prog
         })
       )
 
-      let isClosingPrevious
+      let isRestarting
 
       watcher.on('all', async (eventName, path) => {
-        if (isClosingPrevious) return
-
-        logger.info('Restaring Server...')
+        if (isRestarting) return
+        isRestarting = true
 
         if (activeDveepInst) {
-          isClosingPrevious = true
+          logger.info('Restaring Server...')
           await activeDveepInst.close()
           activeDveepInst = undefined
-          isClosingPrevious = false
         }
 
         activeDveepInst = await dveep({
@@ -64,6 +62,8 @@ prog
           source: opts.src,
           port: opts.port,
         })
+
+        isRestarting = false
       })
     }
   })

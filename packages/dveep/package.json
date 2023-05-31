@@ -1,6 +1,6 @@
 {
   "name": "dveep",
-  "version": "0.0.1-alpha.4",
+  "version": "0.0.1-alpha.3",
   "bin": "dist/dveep.cjs",
   "type": "module",
   "main": "dist/index.js",

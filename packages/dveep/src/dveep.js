@@ -5,14 +5,16 @@
 // a controller path alias
 // `_controllers` are a special folder
 
-import fs from 'node:fs/promises'
+import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
+import fs, { copyFile, mkdir } from 'node:fs/promises'
+import path from 'node:path'
 import { dirname, resolve } from 'path'
 import glob from 'tiny-glob'
 import { buildClientFile, buildServerEntry } from './lib/builder.js'
 import { config } from './lib/config.js'
 import { nopanic } from './lib/promise.js'
-import { prepareServer, serve } from './lib/server.js'
+// import { prepareServer, serve } from './lib/server.js'
 
 export async function dveep(options) {
   config.source = options.source
@@ -22,13 +24,18 @@ export async function dveep(options) {
   config.compiled.source = resolve(config.compiled.root, 'source')
   config.generated.islands = resolve(config.compiled.root, '.generated')
   config.compiled.public = resolve(config.compiled.root, 'client')
+  config.baseHTML = resolve(config.source, 'index.html')
+  config.compiled.baseHTML = resolve(config.compiled.root, 'index.html')
   config.devMode = options.devMode
+
+  await mkdir(config.compiled.source, {
+    recursive: true,
+  })
 
   const { err } = await nopanic(() => compileSource(options.source))
 
   if (err) {
-    console.error(err)
-    return
+    throw err
   }
 
   // If any island was generated, compile that as well
@@ -46,19 +53,26 @@ export async function dveep(options) {
   }
 
   if (!options.buildOnly) {
-    const { app, router } = await prepareServer()
+    const runner = spawn(
+      'node',
+      [`${path.join(config.compiled.root, 'node-server.cjs')}`],
+      { stdio: 'inherit' }
+    )
 
-    const routerFile = resolve(config.compiled.source, '_router.cjs')
-    if (routerFile) {
-      let routerMod = await import(routerFile)
-      routerMod = routerMod.default || routerMod
-      routerMod(router)
+    // runner.stdout.pipe(process.stdout)
+
+    return {
+      async close() {
+        runner.kill()
+      },
     }
-
-    return serve(app)
   }
 
   return
+}
+
+async function copyAsset(src, dest) {
+  await copyFile(src, dest)
 }
 
 async function compileSource(dir) {
@@ -71,6 +85,8 @@ async function compileSource(dir) {
     console.log("File doesn't exist")
     return
   }
+
+  copyAsset(config.baseHTML, config.compiled.baseHTML)
 
   await buildServerEntry(
     routerFile,

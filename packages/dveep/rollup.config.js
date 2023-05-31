@@ -51,4 +51,5 @@ export default [
     cfg.output.format = 'esm'
     return cfg
   }),
+  config('./src/entries/node-server.js', './dist/entries/node-server.cjs'),
 ]

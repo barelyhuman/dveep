@@ -1,20 +1,24 @@
 import klr from 'kleur'
 import fs from 'node:fs/promises'
 import { createServer } from 'node:http'
-import { resolve } from 'node:path'
+import path from 'node:path'
 import * as polkaImports from 'polka'
 import { h } from 'preact'
 import preactRender from 'preact-render-to-string'
 import serveStatic from 'serve-static'
-import { config } from './config'
-import { normaliseImport } from './imports'
-import { logger } from './logger'
+import { logger } from '../lib/logger'
+
+const normaliseImport = mod => mod.default || mod
+
 const polka = normaliseImport(polkaImports)
 
-export const prepareServer = async () => {
+// replaced during build
+__config
+
+const prepareServer = async () => {
   const app = polka()
 
-  app.use('/public', publicDirSetup(config.compiled.public))
+  app.use('/public', publicDirSetup(path.resolve(__config.compiled.public)))
   app.use(createComponentRender())
 
   if (!app.server) {
@@ -32,7 +36,7 @@ function createComponentRender() {
     res.componentRender = (component, props) => {
       ;(async () => {
         const baseHTML = await fs.readFile(
-          resolve(config.source, 'index.html'),
+          path.resolve(__config.baseHTML),
           'utf8'
         )
 
@@ -60,11 +64,11 @@ function publicDirSetup(dirPath) {
   return serveStatic(dirPath)
 }
 
-export const serve = app => {
+const serve = app => {
   let listening = false
 
-  app.listen(config.port, () => {
-    logger.log(`${klr.dim('>')} Listening on: ${klr.green(config.port)}`)
+  app.listen(__config.port, () => {
+    logger.log(`${klr.dim('>')} Listening on: ${klr.green(__config.port)}\n`)
   })
 
   app.server.once('listening', _ => (listening = true))
@@ -80,3 +84,13 @@ export const serve = app => {
     },
   }
 }
+
+async function main() {
+  const { app, router } = await prepareServer()
+
+  __applyRoutesHere
+
+  serve(app)
+}
+
+main()

@@ -5,6 +5,7 @@ export const nopanic = async fn => {
       err: undefined,
     }
   } catch (err) {
+    console.error(err)
     return {
       data: undefined,
       err: err,

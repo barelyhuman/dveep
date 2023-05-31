@@ -1,7 +1,9 @@
-import { HomePage } from './components/HomePage.js'
+import Typer from './components/typer.js'
 
 export default function routes(router) {
   router.get('/', (req, res) => {
-    res.componentRender(HomePage, {})
+    res.componentRender(Typer, {
+      wordCount: 6,
+    })
   })
 }
